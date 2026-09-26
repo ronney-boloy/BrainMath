@@ -10,10 +10,32 @@
 <body>
 <div id="app">
 
-  <!-- HOME -->
-  <div id="s-home" class="screen active">
+  <!-- AUTH -->
+  <div id="s-auth" class="screen active">
     <div class="top-bar">
       <div class="logo">Brain<span>Math</span></div>
+      <div class="tagline">Entre para salvar seu progresso 🔐</div>
+    </div>
+    <div class="card" style="margin-top:1.5rem;">
+      <label for="auth-username" class="sec-title" style="margin:0 0 0.5rem;">Nome de exibição</label>
+      <input type="text" id="auth-username" class="auth-input" placeholder="Como quer aparecer no ranking" autocomplete="nickname" maxlength="24">
+      <label for="auth-email" class="sec-title" style="margin:1rem 0 0.5rem;">Email</label>
+      <input type="email" id="auth-email" class="auth-input" placeholder="seu@email.com" autocomplete="email">
+      <label for="auth-password" class="sec-title" style="margin:1rem 0 0.5rem;">Senha</label>
+      <input type="password" id="auth-password" class="auth-input" placeholder="mínimo 6 caracteres" autocomplete="current-password">
+      <div class="feedback" id="auth-fb" role="status" aria-live="polite"></div>
+    </div>
+    <button class="btn btn-pri" onclick="handleSignIn()">Entrar</button>
+    <button class="btn btn-sec" onclick="handleSignUp()">Criar conta</button>
+  </div>
+
+  <!-- HOME -->
+  <div id="s-home" class="screen">
+    <div class="top-bar">
+      <div class="top-bar-row">
+        <div class="logo">Brain<span>Math</span></div>
+        <button class="logout-btn" onclick="handleSignOut()">Sair</button>
+      </div>
       <div class="tagline">Raciocínio lógico para o dia a dia 🧠</div>
     </div>
 
@@ -174,9 +196,9 @@
   </div>
 </div>
 
-<script src="script/script.js"></script>
 
-<!----Importtando a bibliotteca do SUPABASE para utilizar back-end-->
+<!----Conexão do banco de dados da API do supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script/script.js"></script>
 </body>
 </html>

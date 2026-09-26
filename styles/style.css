@@ -1,4 +1,4 @@
-v*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
     --purple: #534AB7;
@@ -51,6 +51,30 @@ v*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   .logo { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
   .logo span { opacity: 0.7; font-weight: 400; }
   .tagline { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+  .top-bar-row { display: flex; align-items: center; justify-content: space-between; }
+  .logout-btn {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .logout-btn:hover { background: rgba(255,255,255,0.25); }
+
+  /* Login/cadastro */
+  .auth-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+  }
+  .auth-input:focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
 
   /* Nav tabs */
   .nav-tabs {
