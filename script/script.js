@@ -15,14 +15,6 @@ const ALL_ACHIEVEMENTS = [
   { id:'eco', icon:'🌱', name:'Eco Herói', desc:'Complete 5 fases (sem papel!)', req: s => s.fases >= 5 },
 ];
 
-const FAKE_RANKING = [
-  { name:'Ana Lima', avatar:'👧', pts:4820, streak:12 },
-  { name:'Pedro Silva', avatar:'👦', pts:3950, streak:8 },
-  { name:'Maria Souza', avatar:'👩', pts:3200, streak:15 },
-  { name:'Lucas Costa', avatar:'🧑', pts:2780, streak:5 },
-  { name:'Beatriz Rocha', avatar:'👧', pts:2100, streak:3 },
-];
-
 const QUESTIONS = {
   easy: [
     { expr:'(-3) + (-5)', lbl:'Resolva:', ans:-8, opts:[-8,-2,8,2] },
@@ -98,6 +90,14 @@ const DICAS = {
 
 const STORAGE_KEY = 'brainmath_state';
 
+// --- Supabase ---
+
+const SUPABASE_URL = 'https://dwuqzjzaxabqjqumtdfs.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_tvlZopJLy5a7qaZGQm5xLg_SKfV9zmX';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+
 let state = {
   pts:0, acertos:0, fases:0, level:1, xp:0, xpMax:100,
   streak:0, bestCombo:0, perfectRuns:0,
@@ -138,6 +138,110 @@ function loadState() {
   }
 }
 
+// --- Autenticação ---
+function setAuthMsg(msg, isError) {
+  const el = document.getElementById('auth-fb');
+  el.textContent = msg;
+  el.className = 'feedback ' + (isError ? 'fb-fail' : 'fb-ok');
+}
+
+async function handleSignUp() {
+  const username = document.getElementById('auth-username').value.trim();
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if (!username) {
+    setAuthMsg('Escolha um nome de exibição.', true);
+    return;
+  }
+  if (!email || password.length < 6) {
+    setAuthMsg('Preencha um email válido e uma senha com 6+ caracteres.', true);
+    return;
+  }
+  setAuthMsg('Criando conta...', false);
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: { data: { username } }
+  });
+  if (error) { setAuthMsg(error.message, true); return; }
+  if (data.session) {
+    await onLoginSuccess(data.user);
+  } else {
+    setAuthMsg('Conta criada! Verifique seu email para confirmar antes de entrar.', false);
+  }
+}
+
+async function handleSignIn() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if (!email || !password) {
+    setAuthMsg('Preencha email e senha.', true);
+    return;
+  }
+  setAuthMsg('Entrando...', false);
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) { setAuthMsg(error.message, true); return; }
+  await onLoginSuccess(data.user);
+}
+
+async function handleSignOut() {
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  document.getElementById('auth-username').value = '';
+  document.getElementById('auth-email').value = '';
+  document.getElementById('auth-password').value = '';
+  showScreen('s-auth');
+}
+
+// Nome escolhido no cadastro; contas antigas (criadas antes desse campo existir) caem no fallback do email
+function getDisplayName() {
+  return currentUser?.user_metadata?.username || currentUser?.email.split('@')[0] || 'Jogador';
+}
+
+async function onLoginSuccess(user) {
+  currentUser = user;
+  await loadRankingRow();
+  showScreen('s-home');
+  updateHome();
+}
+
+// Busca a linha do jogador no ranking; se não existir (primeiro login), cria uma
+async function loadRankingRow() {
+  const { data, error } = await supabaseClient
+    .from('ranking')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .maybeSingle();
+
+  if (error) { console.error('Erro ao carregar ranking:', error); return; }
+
+  if (data) {
+    state.pts = data.pts;
+    state.streak = data.streak;
+    state.bestCombo = data.best_combo;
+  } else {
+    await supabaseClient.from('ranking').insert({
+      user_id: currentUser.id,
+      username: getDisplayName(),
+      pts: 0, streak: 0, best_combo: 0
+    });
+  }
+}
+
+// Grava a pontuação atual do jogador no Supabase (chamado sempre que o estado muda)
+async function syncRanking() {
+  if (!currentUser) return;
+  const { error } = await supabaseClient.from('ranking').upsert({
+    user_id: currentUser.id,
+    username: getDisplayName(),
+    pts: state.pts,
+    streak: state.streak,
+    best_combo: state.bestCombo,
+    updated_at: new Date().toISOString()
+  });
+  if (error) console.error('Erro ao salvar ranking:', error);
+}
+
 function shuffle(arr) { return [...arr].sort(() => Math.random()-0.5); }
 
 function getLevelName(lvl) { return LEVEL_NAMES[Math.min(lvl-1, LEVEL_NAMES.length-1)]; }
@@ -162,6 +266,7 @@ function updateHome() {
   renderRanking();
   renderAchievements();
   saveState();
+  syncRanking();
 }
 
 function startLevel(lvl) {
@@ -327,25 +432,33 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-function renderRanking() {
-  const myRank = [...FAKE_RANKING, {name:'Você', avatar:'🧑‍🎓', pts:state.pts, streak:state.streak, isYou:true}]
-    .sort((a,b)=>b.pts-a.pts);
-
+async function renderRanking() {
   document.getElementById('rank-meu-pts').textContent = state.pts+' pts';
-  const myPos = myRank.findIndex(r=>r.isYou)+1;
-  document.getElementById('rank-minha-pos').textContent = myPos+'º lugar entre '+myRank.length+' jogadores';
+
+  const { data, error } = await supabaseClient
+    .from('ranking')
+    .select('*')
+    .order('pts', { ascending: false })
+    .limit(20);
+
+  if (error) { console.error('Erro ao buscar ranking:', error); return; }
+
+  const myPos = data.findIndex(r => r.user_id === currentUser?.id) + 1;
+  document.getElementById('rank-minha-pos').textContent =
+    myPos > 0 ? myPos+'º lugar entre '+data.length+' jogadores' : 'Posição: —';
 
   const medals = ['🥇','🥈','🥉'];
   const list = document.getElementById('rank-list');
   list.innerHTML = '';
-  myRank.slice(0,8).forEach((r,i) => {
+  data.forEach((r,i) => {
+    const isYou = r.user_id === currentUser?.id;
     const div = document.createElement('div');
-    div.className = 'rank-item'+(r.isYou?' you':'');
+    div.className = 'rank-item'+(isYou?' you':'');
     div.innerHTML = `
       <div class="rank-pos">${medals[i]||('#'+(i+1))}</div>
-      <div class="rank-avatar">${r.avatar}</div>
+      <div class="rank-avatar">🧑</div>
       <div>
-        <div class="rank-name">${r.name}${r.isYou?' (você)':''}</div>
+        <div class="rank-name">${r.username}${isYou?' (você)':''}</div>
         <div class="rank-sub">🔥 ${r.streak} dias</div>
       </div>
       <div class="rank-pts">${r.pts}</div>
@@ -393,4 +506,12 @@ function showScreen(id) {
 function goHome() { showScreen('s-home'); updateHome(); }
 
 loadState();
-updateHome();
+
+(async function init() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    await onLoginSuccess(session.user);
+  } else {
+    showScreen('s-auth');
+  }
+})();
