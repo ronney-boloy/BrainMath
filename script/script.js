@@ -91,7 +91,7 @@ const DICAS = {
 const STORAGE_KEY = 'brainmath_state';
 
 // --- Supabase ---
-// TODO: troque pelos valores do seu projeto (Project Settings → API)
+
 const SUPABASE_URL = 'https://dwuqzjzaxabqjqumtdfs.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_tvlZopJLy5a7qaZGQm5xLg_SKfV9zmX';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
