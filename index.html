@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BrainMath – aprenda raciocínio lógico e matemático com quizzes, ranking e conquistas.">
+<title>BrainMath – Raciocínio Lógico</title>
+<link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <div id="s-home" class="screen active">
+    <div class="top-bar">
+      <div class="logo">Brain<span>Math</span></div>
+      <div class="tagline">Raciocínio lógico para o dia a dia 🧠</div>
+    </div>
+
+    <div class="nav-tabs" role="tablist">
+      <div class="nav-tab active" id="tab-home" role="tab" tabindex="0" aria-selected="true" onclick="showTab('home')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showTab('home')}">
+        <span class="nav-tab-icon">🏠</span>Início
+      </div>
+      <div class="nav-tab" id="tab-ranking" role="tab" tabindex="0" aria-selected="false" onclick="showTab('ranking')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showTab('ranking')}">
+        <span class="nav-tab-icon">🏆</span>Ranking
+      </div>
+      <div class="nav-tab" id="tab-conquistas" role="tab" tabindex="0" aria-selected="false" onclick="showTab('conquistas')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showTab('conquistas')}">
+        <span class="nav-tab-icon">⭐</span>Conquistas
+      </div>
+    </div>
+
+    <!-- Home tab -->
+    <div id="tab-home-content">
+      <div class="card" style="margin-top:1rem;">
+        <div class="level-row">
+          <div class="level-badge-big" id="h-lvl-circle">1</div>
+          <div class="level-info">
+            <div class="level-name-txt" id="h-lvl-name">Iniciante</div>
+            <div class="xp-txt"><span id="h-xp">0</span> / <span id="h-xpmax">100</span> XP</div>
+            <div class="xp-bar-wrap"><div class="xp-bar" id="h-xp-bar" style="width:0%"></div></div>
+          </div>
+          <div style="text-align:right;margin-left:10px;">
+            <div style="font-size:20px;">🔥</div>
+            <div style="font-size:12px;font-weight:600;color:var(--purple)" id="h-streak">0 dias</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-val" id="h-pts">0</div><div class="stat-lbl">pontos</div></div>
+        <div class="stat-box"><div class="stat-val" id="h-acertos">0</div><div class="stat-lbl">acertos</div></div>
+        <div class="stat-box"><div class="stat-val" id="h-fases">0</div><div class="stat-lbl">fases</div></div>
+      </div>
+
+      <div class="sec-title">Escolha a fase</div>
+      <div class="level-grid">
+        <div class="lvl-btn easy" role="button" tabindex="0" onclick="startLevel('easy')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startLevel('easy')}">
+          <div class="lvl-icon">🟢</div>
+          <div class="lvl-name">Fácil</div>
+          <div class="lvl-desc">Sinais básicos</div>
+          <span class="lvl-badge b-easy">Desbloqueado</span>
+        </div>
+        <div class="lvl-btn med locked" id="btn-med" role="button" tabindex="0" aria-disabled="true" onclick="startLevel('med')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startLevel('med')}">
+          <div class="lvl-icon">🟡</div>
+          <div class="lvl-name">Médio</div>
+          <div class="lvl-desc">Expressões mistas</div>
+          <span class="lvl-badge b-lock" id="lbl-med">🔒 5 acertos</span>
+        </div>
+        <div class="lvl-btn hard locked" id="btn-hard" role="button" tabindex="0" aria-disabled="true" onclick="startLevel('hard')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startLevel('hard')}">
+          <div class="lvl-icon">🔴</div>
+          <div class="lvl-name">Difícil</div>
+          <div class="lvl-desc">Lógica avançada</div>
+          <span class="lvl-badge b-lock" id="lbl-hard">🔒 15 acertos</span>
+        </div>
+        <div class="lvl-btn master locked" id="btn-master" role="button" tabindex="0" aria-disabled="true" onclick="startLevel('master')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startLevel('master')}">
+          <div class="lvl-icon">⚡</div>
+          <div class="lvl-name">Mestre</div>
+          <div class="lvl-desc">Desafio total</div>
+          <span class="lvl-badge b-lock" id="lbl-master">🔒 30 acertos</span>
+        </div>
+      </div>
+
+      <div class="sec-title">Sustentabilidade</div>
+      <div class="chips-row">
+        <div class="chip">🌱 Sem papel</div>
+        <div class="chip">♻️ Eco-friendly</div>
+        <div class="chip purple">⚡ Baixo consumo</div>
+        <div class="chip purple">🧠 Raciocínio</div>
+      </div>
+      <div class="card" style="margin-top:0;">
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;">
+          O BrainMath substitui cadernos e folhas de exercício, reduzindo o consumo de papel e o corte de árvores. A interface leve consome mínima bateria, usando menos energia elétrica.
+        </div>
+      </div>
+    </div>
+
+    <!-- Ranking tab -->
+    <div id="tab-ranking-content" style="display:none;">
+      <div class="card" style="margin-top:1rem;text-align:center;">
+        <div style="font-size:13px;color:var(--text2);">Seu melhor desempenho</div>
+        <div style="font-size:28px;font-weight:700;color:var(--purple);margin:4px 0" id="rank-meu-pts">0 pts</div>
+        <div style="font-size:12px;color:var(--text2);" id="rank-minha-pos">Posição: —</div>
+      </div>
+      <div class="sec-title">Top Jogadores</div>
+      <div class="rank-list" id="rank-list"></div>
+    </div>
+
+    <!-- Conquistas tab -->
+    <div id="tab-conquistas-content" style="display:none;">
+      <div class="card" style="margin-top:1rem;text-align:center;">
+        <div style="font-size:13px;color:var(--text2);">Conquistas desbloqueadas</div>
+        <div style="font-size:28px;font-weight:700;color:var(--purple);margin:4px 0" id="ach-count">0 / 12</div>
+      </div>
+      <div class="sec-title">Suas conquistas</div>
+      <div class="ach-grid" id="ach-grid"></div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="s-quiz" class="screen">
+    <div class="quiz-header">
+      <div class="quiz-top">
+        <span class="q-label">Questão <span id="q-num">1</span>/10</span>
+        <span class="q-lives" id="q-lives" aria-label="Vidas restantes">❤️❤️❤️</span>
+        <span class="q-pts-badge">+<span id="q-pts">10</span> pts</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="q-prog" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="streak-dots" id="streak-dots"></div>
+
+    <div class="q-card">
+      <div class="q-text-lbl" id="q-text-lbl">Resolva a expressão:</div>
+      <div class="q-expr" id="q-expr">(-3) + (-5)</div>
+      <div class="opts-grid" id="q-opts"></div>
+      <div class="feedback" id="q-fb" role="status" aria-live="polite"></div>
+      <div class="combo-banner" id="combo-banner">🔥 Combo ativo! Bônus de pontos!</div>
+    </div>
+
+    <button class="btn btn-sec" onclick="goHome()">← Sair da fase</button>
+  </div>
+
+  <!-- RESULTADO -->
+  <div id="s-result" class="screen">
+    <div class="result-hero">
+      <div class="result-emoji" id="r-emoji">🏆</div>
+      <div class="result-title" id="r-title">Fase concluída!</div>
+      <div class="result-sub" id="r-sub">Você foi muito bem!</div>
+      <div class="xp-pill" id="r-xp">+50 XP</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-val" id="r-acertos">0</div><div class="stat-lbl">acertos</div></div>
+      <div class="stat-box"><div class="stat-val" id="r-total">10</div><div class="stat-lbl">questões</div></div>
+      <div class="stat-box"><div class="stat-val" id="r-bonus">0</div><div class="stat-lbl">bônus pts</div></div>
+    </div>
+    <div class="card" style="font-size:13px;color:var(--text2);line-height:1.6;" id="r-dica"></div>
+    <button class="btn btn-pri" onclick="startLevel(currentLevel)">Jogar novamente ↺</button>
+    <button class="btn btn-sec" onclick="goHome()">← Voltar ao início</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" role="status" aria-live="polite">🎉 Conquista desbloqueada!</div>
+
+<!-- Level up modal -->
+<div id="lvlup-modal" role="dialog" aria-modal="true" aria-labelledby="lvlup-txt">
+  <div class="lvlup-box">
+    <div class="lvlup-emoji">⬆️</div>
+    <div class="lvlup-title" id="lvlup-txt">Nível 2!</div>
+    <div class="lvlup-sub" id="lvlup-sub">Você subiu de nível!</div>
+    <button class="btn btn-pri" style="margin-top:1rem;" onclick="closeLvlUp()">Continuar 🚀</button>
+  </div>
+</div>
+
+<script src="script/script.js"></script>
+
+<!----Importtando a bibliotteca do SUPABASE para utilizar back-end-->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</body>
+</html>
